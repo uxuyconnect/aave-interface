@@ -17,6 +17,7 @@ export enum WalletType {
   WALLET_CONNECT = 'wallet_connect',
   WALLET_LINK = 'wallet_link',
   TORUS = 'torus',
+  UXUY = 'uxuy',
   FRAME = 'frame',
   GNOSIS = 'gnosis',
   LEDGER = 'ledger',
@@ -72,6 +73,87 @@ export class ReadOnlyModeConnector extends AbstractConnector {
   }
 }
 
+interface UxuyConnectorArguments {
+  chainId: number;
+  initOptions?: any;
+  constructorOptions?: any;
+}
+
+export interface ProviderRpcError extends Error {
+  message: string;
+  code: number;
+  data?: unknown;
+}
+
+export class UxuyConnector extends AbstractConnector {
+  private readonly chainId: number;
+  //private readonly initOptions: any;
+  private readonly constructorOptions: any;
+
+  public uxuy: any;
+
+  constructor({ chainId, constructorOptions = {} }: UxuyConnectorArguments) {
+    super({
+      supportedChainIds: [1, 56, 8453, 42161, 137, 250, 10, 43114, 324, 59144, 1116, 810180],
+    });
+
+    this.chainId = chainId;
+    //this.initOptions = initOptions;
+    this.constructorOptions = constructorOptions;
+  }
+
+  public async activate(): Promise<ConnectorUpdate> {
+    if (!this.uxuy) {
+      const Uxuy = await import('@uxuycom/web3-tg-sdk').then((m) => m?.default ?? m);
+      this.uxuy = new Uxuy['WalletTgSdk'](this.constructorOptions);
+      //await this.uxuy.init(this.initOptions);
+    }
+
+    let accounts = await this.uxuy.ethereum.request({ method: 'eth_accounts' });
+
+    if (!accounts[0]) {
+      await this.uxuy.ethereum.request({ method: 'eth_requestAccounts' });
+    }
+
+    accounts = await this.uxuy.ethereum.request({ method: 'eth_accounts' });
+
+    // Set up event listeners for account and chain changes
+    this.uxuy.ethereum.removeAllListeners();
+    this.uxuy.ethereum.on('accountsChanged', (accounts: any) => {
+      console.log('Active account changed:', accounts[0]);
+    });
+    this.uxuy.ethereum.on('chainChanged', async (changedChainId: any) => {
+      console.log('Network changed to:', changedChainId);
+      this.emitUpdate({ chainId: changedChainId, provider: this.uxuy.ethereum });
+    });
+
+    return { provider: this.uxuy.ethereum, account: accounts[0] };
+  }
+
+  public async getProvider(): Promise<any> {
+    return this.uxuy.ethereum;
+  }
+
+  public async getChainId(): Promise<number | string> {
+    return this.chainId;
+  }
+
+  public async getAccount(): Promise<null | string> {
+    return this.uxuy.ethereum
+      .request({ method: 'eth_accounts' })
+      .then((accounts: string[]): string => accounts[0]);
+  }
+
+  public async deactivate() {}
+
+  public async close() {
+    this.uxuy.ethereum.removeAllListeners();
+    this.uxuy = undefined;
+    this.emitDeactivate();
+  }
+}
+
+
 export const getWallet = (
   wallet: WalletType,
   chainId: ChainId = ChainId.mainnet,
@@ -110,6 +192,20 @@ export const getWallet = (
           enabledVerifiers: false,
         },
       });
+
+    case WalletType.UXUY:
+      return new UxuyConnector({
+        chainId,
+        constructorOptions: {},
+        initOptions: {
+          network: {
+            host: chainId === ChainId.polygon ? 'matic' : chainId,
+          },
+          enableLogging: false,
+          enabledVerifiers: false,
+        },
+      });
+
     case WalletType.FRAME: {
       if (chainId !== ChainId.mainnet) {
         throw new UnsupportedChainIdError(chainId, [1]);

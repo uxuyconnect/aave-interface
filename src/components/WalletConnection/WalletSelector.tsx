@@ -61,6 +61,16 @@ const WalletRow = ({ walletName, walletType }: WalletRowProps) => {
             alt={`browser wallet icon`}
           />
         );
+
+        case WalletType.UXUY:
+        return (
+          <img
+            src={`/icons/wallets/uxuy.svg`}
+            width="24px"
+            height="24px"
+            alt={`browser wallet icon`}
+          />
+        );
       // case WalletType.FRAME:
       //   return (
       //     <img
@@ -172,22 +182,9 @@ export const WalletSelector = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <TxModalTitle title="Connect a wallet" />
       {error && <Warning severity="error">{handleBlocking()}</Warning>}
-      <WalletRow
-        key="browser_wallet"
-        walletName="Browser wallet"
-        walletType={WalletType.INJECTED}
-      />
-      <WalletRow
-        key="walletconnect_wallet"
-        walletName="WalletConnect"
-        walletType={WalletType.WALLET_CONNECT}
-      />
-      <WalletRow
-        key="walletlink_wallet"
-        walletName="Coinbase Wallet"
-        walletType={WalletType.WALLET_LINK}
-      />
-      <WalletRow key="torus_wallet" walletName="Torus" walletType={WalletType.TORUS} />
+
+      <WalletRow key="uxuy_wallet" walletName="Uxuy" walletType={WalletType.UXUY} />
+      
       {/* <WalletRow key="frame_wallet" walletName="Frame" walletType={WalletType.FRAME} /> */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, padding: '10px 0' }}>
         <Typography variant="subheader1" color="text.secondary">

@@ -47,6 +47,7 @@
     "@mui/material": "^5.10.9",
     "@paraswap/sdk": "6.2.4",
     "@tanstack/react-query": "^4.28.0",
+    "@uxuycom/web3-tg-sdk": "^0.0.5",
     "@visx/annotation": "^3.3.0",
     "@visx/axis": "^2.14.0",
     "@visx/curve": "^2.1.0",
@@ -157,5 +158,6 @@
     "budget": null,
     "budgetPercentIncreaseRed": 20,
     "showDetails": true
-  }
+  },
+  "packageManager": "yarn@3.8.5"
 }
