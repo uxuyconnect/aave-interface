@@ -183,7 +183,7 @@ export const WalletSelector = () => {
       <TxModalTitle title="Connect a wallet" />
       {error && <Warning severity="error">{handleBlocking()}</Warning>}
 
-      <WalletRow key="uxuy_wallet" walletName="Uxuy" walletType={WalletType.UXUY} />
+      <WalletRow key="uxuy_wallet" walletName="UXUY Wallet" walletType={WalletType.UXUY} />
       
       {/* <WalletRow key="frame_wallet" walletName="Frame" walletType={WalletType.FRAME} /> */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, padding: '10px 0' }}>
